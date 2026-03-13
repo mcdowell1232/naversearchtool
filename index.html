@@ -3,299 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>네이버 키워드 분석 도구 – KeywordLens</title>
+  <title>네이버 키워드 분석 도구</title>
+  <link rel="stylesheet" href="css/style.css" />
   <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.0/css/all.min.css" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
-<style>
-/* ===================================================
-   KeywordLens - 네이버 키워드 분석 도구
-=================================================== */
-:root {
-  --primary: #03C75A;
-  --primary-dark: #02a84b;
-  --primary-light: #e6f9ef;
-  --naver-green: #03C75A;
-  --accent: #4F46E5;
-  --accent-light: #EEF2FF;
-  --danger: #EF4444;
-  --warning: #F59E0B;
-  --info: #3B82F6;
-  --bg: #F0F2F5;
-  --surface: #FFFFFF;
-  --surface-2: #F8FAFC;
-  --border: #E2E8F0;
-  --border-dark: #CBD5E1;
-  --text-primary: #0F172A;
-  --text-secondary: #475569;
-  --text-muted: #94A3B8;
-  --shadow-sm: 0 1px 3px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
-  --shadow: 0 4px 16px rgba(0,0,0,.08);
-  --shadow-lg: 0 8px 32px rgba(0,0,0,.12);
-  --radius: 14px;
-  --radius-sm: 8px;
-  --radius-lg: 20px;
-}
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html { font-size: 14px; }
-body {
-  font-family: 'Pretendard', 'Apple SD Gothic Neo', sans-serif;
-  background: var(--bg);
-  color: var(--text-primary);
-  min-height: 100vh;
-  line-height: 1.6;
-}
-
-/* Header */
-.header { position: sticky; top: 0; z-index: 100; background: var(--surface); border-bottom: 1px solid var(--border); box-shadow: var(--shadow-sm); }
-.header-inner { max-width: 1280px; margin: 0 auto; padding: 0 24px; height: 60px; display: flex; align-items: center; justify-content: space-between; }
-.logo { display: flex; align-items: center; gap: 8px; }
-.logo-icon { width: 34px; height: 34px; background: linear-gradient(135deg, var(--primary) 0%, #00a84f 100%); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 15px; }
-.logo-text { font-size: 18px; font-weight: 800; color: var(--text-primary); letter-spacing: -0.5px; }
-.logo-badge { background: var(--primary); color: #fff; font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 20px; letter-spacing: 0.5px; }
-.btn-settings { display: flex; align-items: center; gap: 6px; padding: 8px 16px; background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 13px; font-weight: 500; color: var(--text-secondary); cursor: pointer; transition: all .2s; }
-.btn-settings:hover { background: var(--surface); border-color: var(--primary); color: var(--primary); }
-
-/* Main */
-.main { max-width: 1280px; margin: 0 auto; padding: 28px 24px 60px; }
-
-/* Search Panel */
-.search-panel { background: var(--surface); border-radius: var(--radius-lg); padding: 28px 32px; box-shadow: var(--shadow); margin-bottom: 28px; }
-.search-panel-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
-.section-title { font-size: 16px; font-weight: 700; color: var(--text-primary); }
-.keyword-counter { font-size: 13px; font-weight: 600; color: var(--text-muted); background: var(--surface-2); padding: 4px 12px; border-radius: 20px; border: 1px solid var(--border); }
-.keyword-counter span { color: var(--primary); }
-.keyword-input-area { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; min-height: 52px; padding: 10px 16px; background: var(--surface-2); border: 2px solid var(--border); border-radius: var(--radius); cursor: text; transition: border-color .2s; }
-.keyword-input-area:focus-within { border-color: var(--primary); background: #fff; }
-.keyword-input { flex: 1; min-width: 200px; border: none; background: transparent; outline: none; font-size: 14px; font-family: inherit; color: var(--text-primary); }
-.keyword-input::placeholder { color: var(--text-muted); }
-.keyword-tags { display: contents; }
-.keyword-tag { display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px; border-radius: 20px; font-size: 13px; font-weight: 600; color: #fff; cursor: default; animation: tagIn .2s ease; }
-@keyframes tagIn { from { opacity: 0; transform: scale(.85); } to { opacity: 1; transform: scale(1); } }
-.keyword-tag .tag-remove { background: rgba(255,255,255,.3); border: none; color: #fff; width: 18px; height: 18px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 10px; transition: background .15s; }
-.keyword-tag .tag-remove:hover { background: rgba(255,255,255,.5); }
-.search-actions { display: flex; justify-content: flex-end; align-items: center; gap: 12px; margin-top: 16px; }
-.btn-clear { padding: 10px 20px; background: transparent; border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 13px; font-weight: 500; color: var(--text-secondary); cursor: pointer; transition: all .2s; font-family: inherit; }
-.btn-clear:hover { border-color: var(--danger); color: var(--danger); }
-.btn-analyze { padding: 10px 28px; background: var(--primary); border: none; border-radius: var(--radius-sm); font-size: 14px; font-weight: 700; color: #fff; cursor: pointer; transition: all .2s; display: flex; align-items: center; gap: 8px; font-family: inherit; box-shadow: 0 4px 14px rgba(3,199,90,.3); }
-.btn-analyze:hover { background: var(--primary-dark); transform: translateY(-1px); box-shadow: 0 6px 20px rgba(3,199,90,.4); }
-.btn-analyze:active { transform: translateY(0); }
-.btn-analyze:disabled { background: var(--border-dark); box-shadow: none; cursor: not-allowed; transform: none; }
-.keyword-suggestions { display: flex; align-items: center; gap: 8px; margin-top: 14px; flex-wrap: wrap; }
-.suggestion-label { font-size: 12px; color: var(--text-muted); }
-.suggestion-chip { padding: 4px 12px; background: transparent; border: 1px solid var(--border); border-radius: 20px; font-size: 12px; font-weight: 500; color: var(--text-secondary); cursor: pointer; transition: all .15s; font-family: inherit; }
-.suggestion-chip:hover { border-color: var(--primary); color: var(--primary); background: var(--primary-light); }
-
-/* Loading */
-.loading-overlay { display: flex; justify-content: center; align-items: center; padding: 80px 0; }
-.loading-box { text-align: center; }
-.loading-spinner { width: 52px; height: 52px; border: 4px solid var(--border); border-top-color: var(--primary); border-radius: 50%; animation: spin .8s linear infinite; margin: 0 auto 18px; }
-@keyframes spin { to { transform: rotate(360deg); } }
-.loading-text { font-size: 15px; font-weight: 600; color: var(--text-primary); }
-.loading-sub { font-size: 13px; color: var(--text-muted); margin-top: 4px; }
-
-/* Empty State */
-.empty-state { text-align: center; padding: 80px 20px; }
-.empty-icon { font-size: 56px; color: var(--border-dark); margin-bottom: 20px; }
-.empty-state h3 { font-size: 18px; font-weight: 700; color: var(--text-secondary); margin-bottom: 8px; }
-.empty-state p { font-size: 14px; color: var(--text-muted); line-height: 1.8; }
-
-/* Tabs */
-.tab-nav { display: flex; gap: 4px; background: var(--surface); padding: 6px; border-radius: var(--radius); box-shadow: var(--shadow-sm); margin-bottom: 24px; border: 1px solid var(--border); overflow-x: auto; }
-.tab-btn { flex: 1; min-width: 120px; padding: 10px 20px; background: transparent; border: none; border-radius: var(--radius-sm); font-size: 13px; font-weight: 600; color: var(--text-muted); cursor: pointer; transition: all .2s; display: flex; align-items: center; justify-content: center; gap: 7px; font-family: inherit; white-space: nowrap; }
-.tab-btn:hover { color: var(--text-secondary); background: var(--surface-2); }
-.tab-btn.active { background: var(--primary); color: #fff; box-shadow: 0 3px 10px rgba(3,199,90,.3); }
-.tab-content { display: none; }
-.tab-content.active { display: block; }
-
-/* Overview Grid */
-.overview-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(380px, 1fr)); gap: 20px; }
-.kw-card { background: var(--surface); border-radius: var(--radius); padding: 24px; box-shadow: var(--shadow-sm); border: 1px solid var(--border); transition: box-shadow .2s, transform .2s; }
-.kw-card:hover { box-shadow: var(--shadow); transform: translateY(-2px); }
-.kw-card-header { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px solid var(--border); }
-.kw-color-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
-.kw-card-title { font-size: 17px; font-weight: 800; color: var(--text-primary); flex: 1; }
-.kw-competition { display: flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 600; }
-.comp-dot { width: 8px; height: 8px; border-radius: 50%; }
-.comp-high { color: var(--danger); }
-.comp-high .comp-dot { background: var(--danger); }
-.comp-mid { color: var(--warning); }
-.comp-mid .comp-dot { background: var(--warning); }
-.comp-low { color: var(--primary); }
-.comp-low .comp-dot { background: var(--primary); }
-
-/* Stats Row */
-.kw-stats-main { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 20px; }
-.stat-item { text-align: center; padding: 12px 8px; background: var(--surface-2); border-radius: var(--radius-sm); border: 1px solid var(--border); }
-.stat-label { font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
-.stat-value { font-size: 18px; font-weight: 800; color: var(--text-primary); }
-.stat-value.highlight { color: var(--primary); }
-.stat-sub { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
-
-/* Device Split Bar */
-.device-split { margin-bottom: 20px; }
-.device-split-label { display: flex; justify-content: space-between; font-size: 12px; font-weight: 600; margin-bottom: 6px; }
-.device-split-label .pc { color: var(--accent); }
-.device-split-label .mo { color: var(--primary); }
-.device-bar { height: 10px; border-radius: 10px; overflow: hidden; background: var(--border); display: flex; }
-.device-bar-pc { background: var(--accent); height: 100%; transition: width .6s ease; }
-.device-bar-mo { background: var(--primary); height: 100%; transition: width .6s ease; }
-
-/* Gender + Age mini */
-.kw-mini-charts { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-.mini-chart-box { background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 12px; }
-.mini-chart-title { font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; }
-.gender-bars { display: flex; flex-direction: column; gap: 6px; }
-.gender-row { display: flex; align-items: center; gap: 8px; }
-.gender-icon { font-size: 13px; width: 14px; text-align: center; }
-.gender-icon.male { color: #3B82F6; }
-.gender-icon.female { color: #EC4899; }
-.gender-bar-wrap { flex: 1; background: var(--border); height: 8px; border-radius: 4px; overflow: hidden; }
-.gender-bar-fill { height: 100%; border-radius: 4px; transition: width .6s ease; }
-.gender-bar-fill.male { background: #3B82F6; }
-.gender-bar-fill.female { background: #EC4899; }
-.gender-pct { font-size: 12px; font-weight: 700; color: var(--text-primary); min-width: 32px; text-align: right; }
-.age-bars { display: flex; align-items: flex-end; gap: 4px; height: 40px; }
-.age-bar-col { display: flex; flex-direction: column; align-items: center; flex: 1; height: 100%; justify-content: flex-end; gap: 2px; }
-.age-bar-fill { width: 100%; border-radius: 3px 3px 0 0; transition: height .6s ease; min-height: 2px; }
-.age-bar-lbl { font-size: 9px; color: var(--text-muted); }
-
-/* CTR badges */
-.ctr-badges { display: flex; gap: 8px; margin-top: 12px; }
-.ctr-badge { flex: 1; text-align: center; padding: 8px; border-radius: var(--radius-sm); }
-.ctr-badge.pc-badge { background: var(--accent-light); }
-.ctr-badge.mo-badge { background: var(--primary-light); }
-.ctr-badge-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 2px; }
-.ctr-badge.pc-badge .ctr-badge-label { color: var(--accent); }
-.ctr-badge.mo-badge .ctr-badge-label { color: var(--primary); }
-.ctr-badge-value { font-size: 16px; font-weight: 800; }
-.ctr-badge.pc-badge .ctr-badge-value { color: var(--accent); }
-.ctr-badge.mo-badge .ctr-badge-value { color: var(--primary); }
-.ctr-badge-sub { font-size: 10px; color: var(--text-muted); }
-
-/* Target Analysis */
-.target-keyword-nav { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 24px; }
-.target-kw-btn { padding: 7px 18px; border-radius: 20px; border: 2px solid var(--border); background: var(--surface); font-size: 13px; font-weight: 600; color: var(--text-secondary); cursor: pointer; transition: all .2s; font-family: inherit; }
-.target-kw-btn.active { color: #fff; border-color: transparent; }
-.target-charts { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-.target-chart-card { background: var(--surface); border-radius: var(--radius); padding: 24px; box-shadow: var(--shadow-sm); border: 1px solid var(--border); }
-.target-chart-card h3 { font-size: 15px; font-weight: 700; color: var(--text-primary); margin-bottom: 4px; }
-.target-chart-subtitle { font-size: 12px; color: var(--text-muted); margin-bottom: 20px; }
-.gender-donut-wrap { display: flex; align-items: center; gap: 24px; }
-.gender-donut-wrap canvas { max-width: 160px; max-height: 160px; }
-.gender-legend { flex: 1; }
-.gender-legend-item { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--border); }
-.gender-legend-item:last-child { border-bottom: none; }
-.legend-dot { width: 12px; height: 12px; border-radius: 3px; flex-shrink: 0; }
-.legend-label { flex: 1; font-size: 13px; font-weight: 500; color: var(--text-secondary); }
-.legend-pct { font-size: 16px; font-weight: 800; color: var(--text-primary); }
-.legend-count { font-size: 11px; color: var(--text-muted); }
-.age-chart-wrap { height: 200px; }
-.age-chart-wrap canvas { width: 100% !important; }
-.insight-box { background: linear-gradient(135deg, #f0fdf4 0%, #eff6ff 100%); border: 1px solid #bbf7d0; border-radius: var(--radius-sm); padding: 14px 16px; margin-top: 16px; display: flex; gap: 10px; align-items: flex-start; }
-.insight-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
-.insight-text { font-size: 13px; color: var(--text-secondary); line-height: 1.6; }
-.insight-text strong { color: var(--text-primary); }
-
-/* Trend Chart */
-.trend-controls { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 12px; }
-.trend-period-btns, .trend-device-btns { display: flex; gap: 4px; background: var(--surface); padding: 4px; border-radius: var(--radius-sm); border: 1px solid var(--border); }
-.period-btn, .device-btn { padding: 7px 16px; border: none; border-radius: 6px; font-size: 13px; font-weight: 600; color: var(--text-muted); background: transparent; cursor: pointer; transition: all .2s; font-family: inherit; }
-.period-btn.active, .device-btn.active { background: var(--primary); color: #fff; }
-.period-btn:hover:not(.active), .device-btn:hover:not(.active) { background: var(--surface-2); color: var(--text-secondary); }
-.trend-chart-wrap { background: var(--surface); border-radius: var(--radius); padding: 24px; box-shadow: var(--shadow-sm); border: 1px solid var(--border); height: 380px; position: relative; }
-.trend-chart-wrap canvas { width: 100% !important; height: 100% !important; }
-.trend-legend { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 16px; padding: 16px 20px; background: var(--surface); border-radius: var(--radius); border: 1px solid var(--border); }
-.trend-legend-item { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; color: var(--text-secondary); }
-.trend-legend-line { width: 24px; height: 3px; border-radius: 2px; }
-
-/* Efficiency Table */
-.efficiency-table-wrap { background: var(--surface); border-radius: var(--radius); box-shadow: var(--shadow-sm); border: 1px solid var(--border); overflow-x: auto; }
-.efficiency-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-.efficiency-table thead th { padding: 14px 16px; background: var(--surface-2); font-weight: 700; color: var(--text-secondary); text-align: center; border-bottom: 2px solid var(--border); white-space: nowrap; }
-.efficiency-table thead th:first-child { text-align: left; padding-left: 24px; }
-.efficiency-table tbody tr { border-bottom: 1px solid var(--border); transition: background .15s; }
-.efficiency-table tbody tr:last-child { border-bottom: none; }
-.efficiency-table tbody tr:hover { background: var(--surface-2); }
-.efficiency-table tbody td { padding: 14px 16px; text-align: center; color: var(--text-primary); }
-.efficiency-table tbody td:first-child { text-align: left; padding-left: 24px; }
-.th-pc { color: var(--accent); font-size: 10px; font-weight: 700; background: var(--accent-light); padding: 2px 6px; border-radius: 4px; display: inline-block; }
-.th-mo { color: var(--primary); font-size: 10px; font-weight: 700; background: var(--primary-light); padding: 2px 6px; border-radius: 4px; display: inline-block; }
-.kw-name-cell { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 14px; }
-.kw-dot-sm { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
-.num-value { font-weight: 700; }
-.ctr-value { font-weight: 600; }
-.score-bar-wrap { display: flex; align-items: center; gap: 8px; justify-content: center; }
-.score-bar-bg { width: 80px; height: 8px; background: var(--border); border-radius: 4px; overflow: hidden; }
-.score-bar-fill { height: 100%; border-radius: 4px; transition: width .6s; }
-.score-num { font-size: 13px; font-weight: 700; min-width: 28px; }
-.comp-badge { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; }
-.comp-badge.high { background: #FEF2F2; color: var(--danger); }
-.comp-badge.mid { background: #FFFBEB; color: var(--warning); }
-.comp-badge.low { background: var(--primary-light); color: var(--primary); }
-
-/* Modal */
-.modal-overlay { position: fixed; inset: 0; background: rgba(15, 23, 42, .5); backdrop-filter: blur(4px); z-index: 200; display: flex; align-items: center; justify-content: center; padding: 20px; }
-.modal { background: var(--surface); border-radius: var(--radius-lg); width: 100%; max-width: 520px; max-height: 90vh; overflow-y: auto; box-shadow: var(--shadow-lg); animation: modalIn .25s ease; }
-@keyframes modalIn { from { opacity: 0; transform: scale(.95) translateY(10px); } to { opacity: 1; transform: scale(1) translateY(0); } }
-.modal-header { padding: 22px 24px 18px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
-.modal-header h3 { font-size: 17px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
-.modal-close { width: 32px; height: 32px; background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius-sm); cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--text-muted); font-size: 14px; transition: all .15s; }
-.modal-close:hover { background: #FEF2F2; border-color: var(--danger); color: var(--danger); }
-.modal-body { padding: 20px 24px; }
-.modal-section { margin-bottom: 24px; }
-.modal-section h4 { font-size: 14px; font-weight: 700; color: var(--text-primary); margin-bottom: 14px; display: flex; align-items: center; gap: 7px; }
-.form-group { margin-bottom: 12px; }
-.form-group label { display: block; font-size: 12px; font-weight: 600; color: var(--text-secondary); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.3px; }
-.form-group input { width: 100%; padding: 10px 14px; background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 13px; font-family: inherit; color: var(--text-primary); transition: border-color .2s; outline: none; }
-.form-group input:focus { border-color: var(--primary); background: #fff; }
-.modal-notice { background: #FFFBEB; border: 1px solid #FDE68A; border-radius: var(--radius-sm); padding: 12px 16px; display: flex; gap: 8px; align-items: flex-start; font-size: 13px; color: #92400E; }
-.modal-footer { padding: 18px 24px 22px; border-top: 1px solid var(--border); display: flex; gap: 10px; justify-content: flex-end; }
-.btn-modal-cancel { padding: 10px 20px; background: transparent; border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 13px; font-weight: 600; color: var(--text-secondary); cursor: pointer; font-family: inherit; transition: all .15s; }
-.btn-modal-cancel:hover { border-color: var(--border-dark); }
-.btn-modal-save { padding: 10px 24px; background: var(--primary); border: none; border-radius: var(--radius-sm); font-size: 13px; font-weight: 700; color: #fff; cursor: pointer; font-family: inherit; display: flex; align-items: center; gap: 6px; transition: all .15s; }
-.btn-modal-save:hover { background: var(--primary-dark); }
-
-/* Toast */
-.toast { position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%) translateY(20px); background: var(--text-primary); color: #fff; padding: 12px 24px; border-radius: var(--radius); font-size: 13px; font-weight: 600; box-shadow: var(--shadow-lg); z-index: 999; opacity: 0; transition: all .3s ease; white-space: nowrap; }
-.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-.toast.success { background: var(--primary); }
-.toast.error { background: var(--danger); }
-
-/* Scrollbar */
-::-webkit-scrollbar { width: 6px; height: 6px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: var(--border-dark); border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: #94A3B8; }
-
-/* Responsive */
-@media (max-width: 900px) {
-  .target-charts { grid-template-columns: 1fr; }
-  .target-charts .target-chart-card[style*="grid-column"] { grid-column: span 1 !important; }
-}
-@media (max-width: 768px) {
-  .main { padding: 20px 16px 40px; }
-  .search-panel { padding: 20px; }
-  .overview-grid { grid-template-columns: 1fr; }
-  .tab-nav { gap: 2px; }
-  .tab-btn { min-width: 80px; font-size: 12px; padding: 9px 10px; gap: 5px; }
-  .trend-controls { flex-direction: column; align-items: flex-start; }
-  .gender-donut-wrap { flex-direction: column; }
-  .kw-stats-main { grid-template-columns: 1fr 1fr; }
-  .kw-mini-charts { grid-template-columns: 1fr; }
-  .header-inner { padding: 0 16px; }
-  .logo-text { font-size: 16px; }
-  .btn-settings span { display: none; }
-}
-@media (max-width: 480px) {
-  .overview-grid { grid-template-columns: 1fr; }
-  .kw-stats-main { grid-template-columns: 1fr; }
-  .ctr-badges { flex-direction: column; }
-}
-</style>
 </head>
 <body>
+  <!-- Header -->
   <header class="header">
     <div class="header-inner">
       <div class="logo">
@@ -304,7 +20,7 @@ body {
         <span class="logo-badge">NAVER</span>
       </div>
       <div class="header-right">
-        <button class="btn-settings" id="btnSettings">
+        <button class="btn-settings" id="btnSettings" onclick="document.getElementById('modalOverlay').style.display='flex';loadApiSettings();">
           <i class="fa-solid fa-gear"></i>
           <span>API 설정</span>
         </button>
@@ -312,7 +28,356 @@ body {
     </div>
   </header>
 
+  <!-- Main Content -->
   <main class="main">
+
+    <!-- Search Panel -->
+    <section class="search-panel">
+      <div class="search-panel-header">
+        <h2 class="section-title">키워드 입력</h2>
+        <span class="keyword-counter"><span id="kwCount">0</span> / 10</span>
+      </div>
+      <div class="keyword-input-area" id="keywordInputArea">
+        <div class="keyword-tags" id="keywordTags"></div>
+        <input
+          type="text"
+          class="keyword-input"
+          id="keywordInput"
+          placeholder="키워드 입력 후 Enter 또는 쉼표로 추가 (최대 10개)"
+          autocomplete="off"
+        />
+      </div>
+      <div class="search-actions">
+        <button class="btn-clear" id="btnClear">
+          <i class="fa-solid fa-xmark"></i> 초기화
+        </button>
+        <button class="btn-analyze" id="btnAnalyze">
+          <i class="fa-solid fa-magnifying-glass-chart"></i>
+          분석 시작
+        </button>
+      </div>
+      <div class="keyword-suggestions">
+        <span class="suggestion-label">예시:</span>
+        <button class="suggestion-chip" data-kw="다이어트">다이어트</button>
+        <button class="suggestion-chip" data-kw="여행">여행</button>
+        <button class="suggestion-chip" data-kw="맛집">맛집</button>
+        <button class="suggestion-chip" data-kw="노트북">노트북</button>
+        <button class="suggestion-chip" data-kw="헬스">헬스</button>
+      </div>
+    </section>
+
+    <!-- Loading State -->
+    <div class="loading-overlay" id="loadingOverlay" style="display:none;">
+      <div class="loading-box">
+        <div class="loading-spinner"></div>
+        <p class="loading-text">데이터를 불러오는 중...</p>
+        <p class="loading-sub" id="loadingStatus">API 연결 중</p>
+      </div>
+    </div>
+
+    <!-- Results Section -->
+    <section class="results-section" id="resultsSection" style="display:none;">
+
+      <!-- Tab Navigation -->
+      <div class="tab-nav">
+        <button class="tab-btn active" data-tab="overview">
+          <i class="fa-solid fa-table-cells-large"></i> 키워드 개요
+        </button>
+        <button class="tab-btn" data-tab="target">
+          <i class="fa-solid fa-users"></i> 타겟 분석
+        </button>
+        <button class="tab-btn" data-tab="trend">
+          <i class="fa-solid fa-arrow-trend-up"></i> 검색 트렌드
+        </button>
+        <button class="tab-btn" data-tab="efficiency">
+          <i class="fa-solid fa-bullseye"></i> 광고 효율
+        </button>
+      </div>
+
+      <!-- Tab: Overview -->
+      <div class="tab-content active" id="tab-overview">
+        <div class="overview-grid" id="overviewGrid"></div>
+      </div>
+
+      <!-- Tab: Target Analysis -->
+      <div class="tab-content" id="tab-target">
+        <div class="target-keyword-nav" id="targetKeywordNav"></div>
+        <div class="target-charts" id="targetCharts"></div>
+      </div>
+
+      <!-- Tab: Trend -->
+      <div class="tab-content" id="tab-trend">
+        <div class="trend-controls">
+          <div class="trend-period-btns">
+            <button class="period-btn" data-period="1">1개월</button>
+            <button class="period-btn active" data-period="3">3개월</button>
+            <button class="period-btn" data-period="6">6개월</button>
+            <button class="period-btn" data-period="12">1년</button>
+          </div>
+          <div class="trend-device-btns">
+            <button class="device-btn active" data-device="all">전체</button>
+            <button class="device-btn" data-device="pc">PC</button>
+            <button class="device-btn" data-device="mo">모바일</button>
+          </div>
+        </div>
+        <div class="trend-chart-wrap">
+          <canvas id="trendChart"></canvas>
+        </div>
+        <div class="trend-legend" id="trendLegend"></div>
+      </div>
+
+      <!-- Tab: Efficiency -->
+      <div class="tab-content" id="tab-efficiency">
+        <div class="efficiency-table-wrap">
+          <table class="efficiency-table" id="efficiencyTable">
+            <thead>
+              <tr>
+                <th>키워드</th>
+                <th>월간 검색량</th>
+                <th><span class="th-pc">PC</span> 클릭수</th>
+                <th><span class="th-mo">MO</span> 클릭수</th>
+                <th><span class="th-pc">PC</span> CTR</th>
+                <th><span class="th-mo">MO</span> CTR</th>
+                <th>경쟁도</th>
+                <th>효율 점수</th>
+              </tr>
+            </thead>
+            <tbody id="efficiencyTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- Empty State -->
+    <div class="empty-state" id="emptyState">
+      <div class="empty-icon"><i class="fa-solid fa-magnifying-glass-chart"></i></div>
+      <h3>키워드를 입력하고 분석을 시작하세요</h3>
+      <p>최대 10개의 키워드를 입력하여<br/>광고주 관점의 상세 데이터를 확인할 수 있습니다.</p>
+    </div>
+
+  </main>
+
+  <!-- API Settings Modal -->
+  <div class="modal-overlay" id="modalOverlay" style="display:none;">
+    <div class="modal">
+      <div class="modal-header">
+        <h3><i class="fa-solid fa-key"></i> API 설정</h3>
+        <button class="modal-close" id="modalClose" onclick="document.getElementById('modalOverlay').style.display='none'"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal-body">
+        <div class="modal-section">
+          <h4><i class="fa-brands fa-cloudflare" style="color:#F48120"></i> Cloudflare Worker URL <span style="color:#EF4444;font-size:11px">필수</span></h4>
+          <div class="form-group">
+            <label>Worker 프록시 URL</label>
+            <input type="text" id="workerUrl" placeholder="https://keywordlens-proxy.xxxxx.workers.dev" />
+          </div>
+          <p class="modal-hint"><i class="fa-solid fa-circle-info"></i> Cloudflare Worker 배포 후 발급받은 URL을 입력하세요. 이 URL을 통해 네이버 API를 안전하게 호출합니다.</p>
+        </div>
+        <div class="modal-section">
+          <h4><i class="fa-solid fa-circle-info" style="color:#3B82F6"></i> API 키 관리 안내</h4>
+          <p style="font-size:13px;color:var(--text-secondary);line-height:1.7">
+            네이버 API 키는 <strong>Cloudflare Worker 환경변수</strong>에만 저장하세요.<br/>
+            브라우저에 직접 입력하지 않는 것이 보안상 안전합니다.
+          </p>
+          <div style="background:var(--surface-2);border:1px solid var(--border);border-radius:8px;padding:14px;margin-top:12px;font-size:12px;color:var(--text-muted);font-family:monospace;line-height:1.8">
+            SEARCHAD_API_KEY = 010000....<br/>
+            SEARCHAD_SECRET  = AQAAAA....<br/>
+            SEARCHAD_CUSTOMER = 1654034<br/>
+            NAVER_CLIENT_ID  = 2pKLdG....<br/>
+            NAVER_CLIENT_SECRET = JoVoM...
+          </div>
+        </div>
+        <div class="modal-notice">
+          <i class="fa-solid fa-flask"></i>
+          <span>Worker URL 미입력 시 <strong>Mock 데이터 모드</strong>로 동작합니다.</span>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-modal-cancel" id="modalCancel" onclick="document.getElementById('modalOverlay').style.display='none'">취소</button>
+        <button class="btn-modal-save" id="modalSave" onclick="saveAndClose()">
+          <i class="fa-solid fa-floppy-disk"></i> 저장
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/mockData.js?v=20260313b"></script>
+  <script src="js/api.js?v=20260313b"></script>
+  <script src="js/charts.js?v=20260313b"></script>
+  <script src="js/app.js?v=20260313b"></script>
+
+  <!-- ══════════════════════════════════════════
+       📦 파일 다운로드 섹션
+  ══════════════════════════════════════════ -->
+  <div id="downloadSection" style="
+    position:fixed; bottom:24px; right:24px;
+    z-index:9999;
+  ">
+    <!-- 토글 버튼 -->
+    <button id="dlToggleBtn" onclick="toggleDownloadPanel()" style="
+      width:52px; height:52px;
+      background:linear-gradient(135deg,#4F46E5,#7C3AED);
+      border:none; border-radius:50%;
+      color:#fff; font-size:20px;
+      cursor:pointer; box-shadow:0 4px 20px rgba(79,70,229,.5);
+      display:flex; align-items:center; justify-content:center;
+      transition:transform .2s;
+    " title="파일 다운로드">⬇️</button>
+
+    <!-- 패널 -->
+    <div id="dlPanel" style="
+      display:none;
+      position:absolute; bottom:64px; right:0;
+      background:#fff; border-radius:16px;
+      box-shadow:0 8px 40px rgba(0,0,0,.18);
+      border:1px solid #E2E8F0;
+      width:320px; padding:20px;
+      font-family:'Pretendard','Apple SD Gothic Neo',sans-serif;
+    ">
+      <div style="font-size:15px;font-weight:800;color:#0F172A;margin-bottom:4px">
+        📦 프로젝트 파일 다운로드
+      </div>
+      <div style="font-size:12px;color:#94A3B8;margin-bottom:16px">
+        GitHub 업로드용 — 버튼 클릭 시 즉시 다운로드
+      </div>
+
+      <!-- 파일 목록 -->
+      <div style="display:flex;flex-direction:column;gap:8px" id="dlFileList">
+        <!-- JS로 채움 -->
+      </div>
+
+      <div style="margin-top:16px;padding-top:14px;border-top:1px solid #E2E8F0;font-size:11px;color:#94A3B8;line-height:1.7">
+        📁 폴더 구조대로 저장하세요:<br>
+        <code style="font-size:10px;color:#475569">
+          keyword-lens/<br>
+          ├── index.html<br>
+          ├── css/style.css<br>
+          ├── js/mockData.js<br>
+          ├── js/api.js<br>
+          ├── js/charts.js<br>
+          ├── js/app.js<br>
+          └── cloudflare-worker/worker.js
+        </code>
+      </div>
+    </div>
+  </div>
+
+  <script>
+  // ════════════════════════════════════════
+  //  다운로드 패널 토글
+  // ════════════════════════════════════════
+  function toggleDownloadPanel() {
+    const panel = document.getElementById('dlPanel');
+    const btn   = document.getElementById('dlToggleBtn');
+    const isOpen = panel.style.display !== 'none';
+    panel.style.display = isOpen ? 'none' : 'block';
+    btn.style.transform  = isOpen ? '' : 'rotate(180deg)';
+    if (!isOpen) buildFileList();
+  }
+
+  // ════════════════════════════════════════
+  //  파일 목록 + Blob 다운로드
+  // ════════════════════════════════════════
+  function buildFileList() {
+    const files = getProjectFiles();
+    const container = document.getElementById('dlFileList');
+    container.innerHTML = files.map(f => `
+      <div style="
+        display:flex; align-items:center; justify-content:space-between;
+        padding:10px 12px;
+        background:#F8FAFC; border:1px solid #E2E8F0; border-radius:10px;
+      ">
+        <div>
+          <div style="font-size:13px;font-weight:700;color:#0F172A">${f.name}</div>
+          <div style="font-size:11px;color:#94A3B8">${f.path}</div>
+        </div>
+        <button onclick="downloadFile('${f.name}', '${f.key}')" style="
+          padding:6px 14px;
+          background:linear-gradient(135deg,#4F46E5,#7C3AED);
+          border:none; border-radius:8px;
+          color:#fff; font-size:12px; font-weight:700;
+          cursor:pointer; white-space:nowrap;
+          font-family:inherit;
+        ">⬇ 저장</button>
+      </div>
+    `).join('');
+  }
+
+  function downloadFile(filename, key) {
+    const content = getFileContent(key);
+    const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href     = url;
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  function getProjectFiles() {
+    return [
+      { name: 'index.html',       path: '루트 폴더',              key: 'index'      },
+      { name: 'style.css',        path: 'css/ 폴더에 넣으세요',   key: 'style'      },
+      { name: 'mockData.js',      path: 'js/ 폴더에 넣으세요',    key: 'mockData'   },
+      { name: 'api.js',           path: 'js/ 폴더에 넣으세요',    key: 'api'        },
+      { name: 'charts.js',        path: 'js/ 폴더에 넣으세요',    key: 'charts'     },
+      { name: 'app.js',           path: 'js/ 폴더에 넣으세요',    key: 'app'        },
+      { name: 'worker.js',        path: 'cloudflare-worker/ 폴더',key: 'worker'     },
+    ];
+  }
+
+  // ════════════════════════════════════════
+  //  각 파일 원본 내용 (Blob embed)
+  // ════════════════════════════════════════
+  function getFileContent(key) {
+    switch(key) {
+      case 'index':    return getIndexHtml();
+      case 'style':    return getStyleCss();
+      case 'mockData': return getMockDataJs();
+      case 'api':      return getApiJs();
+      case 'charts':   return getChartsJs();
+      case 'app':      return getAppJs();
+      case 'worker':   return getWorkerJs();
+      default: return '';
+    }
+  }
+
+  // ── index.html ──────────────────────────
+  function getIndexHtml() {
+    return `<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>네이버 키워드 분석 도구</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.0/css/all.min.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"><\/script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"><\/script>
+</head>
+<body>
+  <!-- Header -->
+  <header class="header">
+    <div class="header-inner">
+      <div class="logo">
+        <span class="logo-icon"><i class="fa-solid fa-chart-line"></i></span>
+        <span class="logo-text">KeywordLens</span>
+        <span class="logo-badge">NAVER</span>
+      </div>
+      <div class="header-right">
+        <button class="btn-settings" id="btnSettings" onclick="document.getElementById('modalOverlay').style.display='flex';loadApiSettings();">
+          <i class="fa-solid fa-gear"></i>
+          <span>API 설정</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="main">
+    <!-- Search Panel -->
     <section class="search-panel">
       <div class="search-panel-header">
         <h2 class="section-title">키워드 입력</h2>
@@ -325,7 +390,7 @@ body {
       </div>
       <div class="search-actions">
         <button class="btn-clear" id="btnClear"><i class="fa-solid fa-xmark"></i> 초기화</button>
-        <button class="btn-analyze" id="btnAnalyze" disabled>
+        <button class="btn-analyze" id="btnAnalyze">
           <i class="fa-solid fa-magnifying-glass-chart"></i> 분석 시작
         </button>
       </div>
@@ -339,14 +404,16 @@ body {
       </div>
     </section>
 
+    <!-- Loading State -->
     <div class="loading-overlay" id="loadingOverlay" style="display:none;">
       <div class="loading-box">
         <div class="loading-spinner"></div>
         <p class="loading-text">데이터를 불러오는 중...</p>
-        <p class="loading-sub" id="loadingStatus">분석 중...</p>
+        <p class="loading-sub" id="loadingStatus">API 연결 중</p>
       </div>
     </div>
 
+    <!-- Results Section -->
     <section class="results-section" id="resultsSection" style="display:none;">
       <div class="tab-nav">
         <button class="tab-btn active" data-tab="overview"><i class="fa-solid fa-table-cells-large"></i> 키워드 개요</button>
@@ -354,9 +421,7 @@ body {
         <button class="tab-btn" data-tab="trend"><i class="fa-solid fa-arrow-trend-up"></i> 검색 트렌드</button>
         <button class="tab-btn" data-tab="efficiency"><i class="fa-solid fa-bullseye"></i> 광고 효율</button>
       </div>
-      <div class="tab-content active" id="tab-overview">
-        <div class="overview-grid" id="overviewGrid"></div>
-      </div>
+      <div class="tab-content active" id="tab-overview"><div class="overview-grid" id="overviewGrid"></div></div>
       <div class="tab-content" id="tab-target">
         <div class="target-keyword-nav" id="targetKeywordNav"></div>
         <div class="target-charts" id="targetCharts"></div>
@@ -399,6 +464,7 @@ body {
       </div>
     </section>
 
+    <!-- Empty State -->
     <div class="empty-state" id="emptyState">
       <div class="empty-icon"><i class="fa-solid fa-magnifying-glass-chart"></i></div>
       <h3>키워드를 입력하고 분석을 시작하세요</h3>
@@ -411,14 +477,30 @@ body {
     <div class="modal">
       <div class="modal-header">
         <h3><i class="fa-solid fa-key"></i> API 설정</h3>
-        <button class="modal-close" id="modalClose"><i class="fa-solid fa-xmark"></i></button>
+        <button class="modal-close" id="modalClose" onclick="document.getElementById('modalOverlay').style.display='none'">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
       </div>
       <div class="modal-body">
         <div class="modal-section">
-          <h4><i class="fa-brands fa-cloudflare" style="color:#F48120"></i> Cloudflare Worker URL</h4>
+          <h4><i class="fa-brands fa-cloudflare" style="color:#F48120"></i> Cloudflare Worker URL <span style="color:#EF4444;font-size:11px">필수</span></h4>
           <div class="form-group">
             <label>Worker 프록시 URL</label>
             <input type="text" id="workerUrl" placeholder="https://keywordlens-proxy.xxxxx.workers.dev" />
+          </div>
+          <p class="modal-hint"><i class="fa-solid fa-circle-info"></i> Cloudflare Worker 배포 후 발급받은 URL을 입력하세요.</p>
+        </div>
+        <div class="modal-section">
+          <h4><i class="fa-solid fa-circle-info" style="color:#3B82F6"></i> API 키 관리 안내</h4>
+          <p style="font-size:13px;color:var(--text-secondary);line-height:1.7">
+            네이버 API 키는 <strong>Cloudflare Worker 환경변수</strong>에만 저장하세요.
+          </p>
+          <div style="background:var(--surface-2);border:1px solid var(--border);border-radius:8px;padding:14px;margin-top:12px;font-size:12px;color:var(--text-muted);font-family:monospace;line-height:1.8">
+            SEARCHAD_API_KEY = 010000....<br/>
+            SEARCHAD_SECRET  = AQAAAA....<br/>
+            SEARCHAD_CUSTOMER = 1654034<br/>
+            NAVER_CLIENT_ID  = 2pKLdG....<br/>
+            NAVER_CLIENT_SECRET = JoVoM...
           </div>
         </div>
         <div class="modal-notice">
@@ -427,832 +509,226 @@ body {
         </div>
       </div>
       <div class="modal-footer">
-        <button class="btn-modal-cancel" id="modalCancel">취소</button>
-        <button class="btn-modal-save" id="modalSave"><i class="fa-solid fa-floppy-disk"></i> 저장</button>
+        <button class="btn-modal-cancel" id="modalCancel" onclick="document.getElementById('modalOverlay').style.display='none'">취소</button>
+        <button class="btn-modal-save" id="modalSave" onclick="saveAndClose()">
+          <i class="fa-solid fa-floppy-disk"></i> 저장
+        </button>
       </div>
     </div>
   </div>
 
-<script>
-/* =====================================================
-   mockData.js - Mock 데이터 생성기
-===================================================== */
-const KEYWORD_COLORS = [
-  '#4F46E5','#EC4899','#F59E0B','#10B981',
-  '#3B82F6','#EF4444','#8B5CF6','#06B6D4',
-  '#F97316','#14B8A6'
-];
-
-function generateTrendData(months, seed, pattern) {
-  const data = [];
-  const now = new Date();
-  for (let i = months - 1; i >= 0; i--) {
-    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-    const label = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
-    let base = 50 + seed * 10;
-    let seasonMod = Math.sin((d.getMonth() / 12) * Math.PI * 2 + pattern) * 20;
-    let noise = (Math.random() - 0.5) * 15;
-    let val = Math.max(5, Math.min(100, Math.round(base + seasonMod + noise)));
-    data.push({ period: label, ratio: val });
-  }
-  return data;
-}
-
-function generateAgeRatio(dominantAge) {
-  const ages = ['10대', '20대', '30대', '40대', '50대', '60대+'];
-  const base = [5, 15, 25, 25, 20, 10];
-  const result = base.map((v, i) => {
-    let adjusted = v + (i === dominantAge ? 20 : -Math.floor(20 / 5));
-    return Math.max(1, adjusted);
-  });
-  const total = result.reduce((a, b) => a + b, 0);
-  return result.map((v, i) => ({
-    label: ages[i],
-    ratio: Math.round((v / total) * 100)
-  }));
-}
-
-function generateMockKeywordData(keyword, index) {
-  const seed = (keyword.charCodeAt(0) + keyword.length) % 10;
-  const rng = (min, max) => Math.floor(min + ((seed * 7 + index * 13 + keyword.length * 3) % (max - min + 1)));
-  const rngFloat = (min, max) => Math.round((min + ((seed * 3.14 + index * 2.71) % (max - min))) * 100) / 100;
-
-  const mobileRatio = rng(55, 85);
-  const pcRatio = 100 - mobileRatio;
-  const mobileSearch = rng(2000, 80000);
-  const pcSearch = Math.round(mobileSearch * (pcRatio / mobileRatio));
-  const totalSearch = mobileSearch + pcSearch;
-
-  const maleRatio = rng(30, 70);
-  const femaleRatio = 100 - maleRatio;
-  const dominantAge = rng(0, 5);
-  const ageRatio = generateAgeRatio(dominantAge);
-
-  const pcCtr = rngFloat(0.5, 4.5);
-  const moCtr = rngFloat(1.0, 6.5);
-  const pcClicks = Math.round(pcSearch * (pcCtr / 100));
-  const moClicks = Math.round(mobileSearch * (moCtr / 100));
-
-  const compRaw = rng(0, 100);
-  const competition = compRaw < 33 ? 'low' : compRaw < 66 ? 'mid' : 'high';
-  const competitionLabel = { low: '낮음', mid: '보통', high: '높음' }[competition];
-
-  const allTrendData = {
-    pc: generateTrendData(12, seed, index * 0.8),
-    mo: generateTrendData(12, seed + 2, index * 0.8 + 0.5),
-  };
-  allTrendData.all = allTrendData.pc.map((d, i) => ({
-    period: d.period,
-    ratio: Math.round((d.ratio + allTrendData.mo[i].ratio) / 2)
-  }));
-
-  const compScore = { low: 100, mid: 60, high: 30 }[competition];
-  const efficiencyScore = Math.round(
-    (Math.log10(totalSearch) / 5) * 35 +
-    ((pcCtr + moCtr) / 2 / 6) * 35 +
-    (compScore / 100) * 30
-  );
-
-  return {
-    keyword, color: KEYWORD_COLORS[index % KEYWORD_COLORS.length], index,
-    found: true,
-    totalSearch, pcSearch, mobileSearch, pcRatio, mobileRatio,
-    maleRatio, femaleRatio, ageRatio,
-    pcCtr, moCtr, pcClicks, moClicks,
-    competition, competitionLabel,
-    trendData: allTrendData,
-    efficiencyScore: Math.min(99, Math.max(10, efficiencyScore)),
-    trendDirection: (() => {
-      const all = allTrendData.all;
-      const last = all[all.length - 1].ratio;
-      const prev = all[all.length - 2].ratio;
-      if (last > prev + 5) return 'up';
-      if (last < prev - 5) return 'down';
-      return 'flat';
-    })()
-  };
-}
-
-function generateMockData(kws) {
-  return kws.map((kw, i) => generateMockKeywordData(kw.trim(), i));
-}
-
-function formatNumber(n) {
-  if (!n && n !== 0) return '-';
-  return n.toLocaleString('ko-KR');
-}
-
-function formatPeriodLabel(period, short = false) {
-  const [y, m] = period.split('-');
-  if (short) return `${parseInt(m)}월`;
-  return `${y}.${m}`;
-}
-
-/* =====================================================
-   api.js - API 클라이언트
-===================================================== */
-const ApiClient = (() => {
-  function getWorkerUrl() {
-    return (localStorage.getItem('kl_workerUrl') || '').replace(/\/$/, '');
-  }
-  async function apiFetch(endpoint, options = {}) {
-    const workerUrl = getWorkerUrl();
-    if (!workerUrl) throw new ApiError('Worker URL 미설정', 'NO_WORKER_URL');
-    let response;
-    try {
-      response = await fetch(`${workerUrl}${endpoint}`, {
-        ...options,
-        headers: { 'Content-Type': 'application/json', ...(options.headers || {}) },
-      });
-    } catch (e) {
-      throw new ApiError('네트워크 오류', 'NETWORK_ERROR');
-    }
-    if (!response.ok) {
-      let errBody = {};
-      try { errBody = await response.json(); } catch {}
-      throw new ApiError(errBody.error || `API 오류 (${response.status})`, 'API_ERROR', response.status, errBody.detail);
-    }
-    return response.json();
-  }
-  async function fetchKeywordData(keywords) {
-    const data = await apiFetch('/keyword', { method: 'POST', body: JSON.stringify({ keywords }) });
-    return data.keywords || [];
-  }
-  async function fetchTrendData(keywords, period = 3, device = 'all') {
-    const { startDate, endDate } = getPeriodDates(period);
-    const deviceParam = device === 'all' ? undefined : device;
-    const data = await apiFetch('/trend', {
-      method: 'POST',
-      body: JSON.stringify({ keywords, startDate, endDate, device: deviceParam }),
-    });
-    return parseTrendResponse(data, keywords);
-  }
-  function getPeriodDates(months) {
-    const end = new Date(); const start = new Date();
-    start.setMonth(start.getMonth() - months);
-    start.setDate(1); end.setDate(1); end.setDate(0);
-    return { startDate: formatDate(start), endDate: formatDate(end) };
-  }
-  function formatDate(d) {
-    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-  }
-  function parseTrendResponse(raw, requestedKeywords) {
-    const results = raw.results || [];
-    const trendMap = {};
-    results.forEach(group => {
-      trendMap[group.title] = group.data.map(d => ({
-        period: d.period.substring(0, 7),
-        ratio: Math.round(d.ratio),
-      }));
-    });
-    return requestedKeywords.map(kw => ({ keyword: kw, data: trendMap[kw] || [] }));
-  }
-  async function healthCheck() { return apiFetch('/health'); }
-  return { fetchKeywordData, fetchTrendData, healthCheck, getPeriodDates, formatDate };
-})();
-
-class ApiError extends Error {
-  constructor(message, code, status, detail) {
-    super(message);
-    this.name = 'ApiError'; this.code = code; this.status = status; this.detail = detail;
-  }
-}
-
-/* =====================================================
-   charts.js - Chart.js 렌더링 모듈
-===================================================== */
-Chart.register(ChartDataLabels);
-
-let trendChartInstance = null;
-let genderChartInstances = {};
-let ageChartInstances = {};
-
-const GENDER_COLORS = { male: '#3B82F6', female: '#EC4899' };
-const AGE_COLORS = ['#818CF8','#A78BFA','#4F46E5','#6366F1','#3B82F6','#06B6D4'];
-const BASE_FONT = { family: "'Pretendard','Apple SD Gothic Neo',sans-serif", size: 12 };
-
-function renderGenderDonut(canvasId, data) {
-  const ctx = document.getElementById(canvasId);
-  if (!ctx) return;
-  if (genderChartInstances[canvasId]) genderChartInstances[canvasId].destroy();
-  genderChartInstances[canvasId] = new Chart(ctx, {
-    type: 'doughnut',
-    data: {
-      labels: ['남성', '여성'],
-      datasets: [{ data: [data.maleRatio, data.femaleRatio], backgroundColor: [GENDER_COLORS.male, GENDER_COLORS.female], borderWidth: 3, borderColor: '#fff', hoverOffset: 6 }]
-    },
-    options: {
-      responsive: true, maintainAspectRatio: true, cutout: '68%',
-      plugins: {
-        legend: { display: false },
-        tooltip: { callbacks: { label: (ctx) => ` ${ctx.label}: ${ctx.parsed}%` } },
-        datalabels: { display: false }
-      }
-    }
-  });
-}
-
-function renderAgeBar(canvasId, ageRatio, color) {
-  const ctx = document.getElementById(canvasId);
-  if (!ctx) return;
-  if (ageChartInstances[canvasId]) ageChartInstances[canvasId].destroy();
-  const maxRatio = Math.max(...ageRatio.map(a => a.ratio));
-  ageChartInstances[canvasId] = new Chart(ctx, {
-    type: 'bar',
-    data: {
-      labels: ageRatio.map(a => a.label),
-      datasets: [{ data: ageRatio.map(a => a.ratio), backgroundColor: ageRatio.map(a => a.ratio === maxRatio ? color : color + '55'), borderRadius: 6, borderSkipped: false }]
-    },
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      plugins: {
-        legend: { display: false },
-        tooltip: { callbacks: { label: (ctx) => ` ${ctx.parsed.y}%` } },
-        datalabels: { anchor: 'end', align: 'end', color: '#475569', font: { ...BASE_FONT, size: 11, weight: '600' }, formatter: (v) => v + '%', offset: -2 }
-      },
-      scales: {
-        x: { grid: { display: false }, border: { display: false }, ticks: { font: BASE_FONT, color: '#94A3B8' } },
-        y: { display: false, max: maxRatio + 15, beginAtZero: true }
-      }
-    }
-  });
-}
-
-function renderTrendChart(allData, period, device) {
-  const ctx = document.getElementById('trendChart');
-  if (!ctx) return;
-  if (trendChartInstance) trendChartInstance.destroy();
-  const now = new Date();
-  const cutoff = new Date(now.getFullYear(), now.getMonth() - period + 1, 1);
-  const filteredData = allData.map(d => {
-    const trend = d.trendData[device];
-    const filtered = trend.filter(t => {
-      const [y, m] = t.period.split('-').map(Number);
-      return new Date(y, m - 1, 1) >= cutoff;
-    });
-    return { ...d, filteredTrend: filtered };
-  });
-  const labels = filteredData[0]?.filteredTrend.map(t => formatPeriodLabel(t.period, period <= 3)) || [];
-  const datasets = filteredData.map(d => ({
-    label: d.keyword, data: d.filteredTrend.map(t => t.ratio),
-    borderColor: d.color, backgroundColor: d.color + '15', borderWidth: 2.5,
-    pointRadius: 4, pointHoverRadius: 7, pointBackgroundColor: d.color,
-    pointBorderColor: '#fff', pointBorderWidth: 2, fill: filteredData.length === 1, tension: 0.35
-  }));
-  trendChartInstance = new Chart(ctx, {
-    type: 'line', data: { labels, datasets },
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      interaction: { mode: 'index', intersect: false },
-      plugins: {
-        legend: { display: false },
-        tooltip: {
-          backgroundColor: 'rgba(15,23,42,.92)',
-          titleFont: { ...BASE_FONT, size: 13, weight: '600' },
-          bodyFont: { ...BASE_FONT, size: 13 }, padding: 12, cornerRadius: 10,
-          callbacks: { label: (ctx) => `  ${ctx.dataset.label}: ${ctx.parsed.y}` }
-        },
-        datalabels: { display: false }
-      },
-      scales: {
-        x: { grid: { color: '#F1F5F9', drawBorder: false }, border: { display: false }, ticks: { font: BASE_FONT, color: '#94A3B8' } },
-        y: { min: 0, max: 100, grid: { color: '#F1F5F9', drawBorder: false }, border: { display: false }, ticks: { font: BASE_FONT, color: '#94A3B8', stepSize: 20, callback: (v) => v } }
-      }
-    }
-  });
-}
-
-function renderTrendLegend(allData) {
-  const container = document.getElementById('trendLegend');
-  if (!container) return;
-  container.innerHTML = allData.map(d => `
-    <div class="trend-legend-item">
-      <div class="trend-legend-line" style="background:${d.color}"></div>
-      <span>${d.keyword}</span>
-    </div>
-  `).join('');
-}
-
-function getScoreColor(score) {
-  if (score >= 70) return '#10B981';
-  if (score >= 45) return '#F59E0B';
-  return '#EF4444';
-}
-
-function destroyAllCharts() {
-  if (trendChartInstance) { trendChartInstance.destroy(); trendChartInstance = null; }
-  Object.values(genderChartInstances).forEach(c => c.destroy());
-  genderChartInstances = {};
-  Object.values(ageChartInstances).forEach(c => c.destroy());
-  ageChartInstances = {};
-}
-
-/* =====================================================
-   app.js - 메인 앱 로직
-===================================================== */
-function isApiMode() { return !!localStorage.getItem('kl_workerUrl'); }
-
-let keywords = [];
-let analysisData = [];
-let rawTrendData = [];
-let activeTab = 'overview';
-let activeTargetKwIndex = 0;
-let trendPeriod = 3;
-let trendDevice = 'all';
-
-const keywordInput   = document.getElementById('keywordInput');
-const keywordTags    = document.getElementById('keywordTags');
-const kwCount        = document.getElementById('kwCount');
-const btnAnalyze     = document.getElementById('btnAnalyze');
-const btnClear       = document.getElementById('btnClear');
-const resultsSection = document.getElementById('resultsSection');
-const emptyState     = document.getElementById('emptyState');
-const loadingOverlay = document.getElementById('loadingOverlay');
-const loadingStatus  = document.getElementById('loadingStatus');
-const modalOverlay   = document.getElementById('modalOverlay');
-const btnSettings    = document.getElementById('btnSettings');
-const modalClose     = document.getElementById('modalClose');
-const modalCancel    = document.getElementById('modalCancel');
-const modalSave      = document.getElementById('modalSave');
-
-function addKeyword(kw) {
-  kw = kw.trim().replace(/[,，]/g, '');
-  if (!kw) return;
-  if (keywords.length >= 10) { showToast('키워드는 최대 10개까지 입력할 수 있습니다.', 'error'); return; }
-  if (keywords.includes(kw)) { showToast(`'${kw}'은(는) 이미 추가된 키워드입니다.`, 'error'); return; }
-  keywords.push(kw);
-  renderTags();
-  keywordInput.value = '';
-}
-
-function removeKeyword(kw) {
-  keywords = keywords.filter(k => k !== kw);
-  renderTags();
-}
-
-function renderTags() {
-  keywordTags.innerHTML = keywords.map((kw, i) => `
-    <span class="keyword-tag" style="background:${KEYWORD_COLORS[i % KEYWORD_COLORS.length]}">
-      ${kw}
-      <button class="tag-remove" data-kw="${kw}" title="삭제"><i class="fa-solid fa-xmark"></i></button>
-    </span>
-  `).join('');
-  kwCount.textContent = keywords.length;
-  btnAnalyze.disabled = keywords.length === 0;
-  keywordTags.querySelectorAll('.tag-remove').forEach(btn => {
-    btn.addEventListener('click', (e) => { e.stopPropagation(); removeKeyword(btn.dataset.kw); });
-  });
-}
-
-keywordInput.addEventListener('keydown', (e) => {
-  if (e.key === 'Enter' || e.key === ',') { e.preventDefault(); addKeyword(keywordInput.value); }
-  if (e.key === 'Backspace' && !keywordInput.value && keywords.length > 0) removeKeyword(keywords[keywords.length - 1]);
-});
-keywordInput.addEventListener('input', (e) => {
-  if (e.target.value.includes(',') || e.target.value.includes('，')) {
-    const parts = e.target.value.split(/[,，]/);
-    parts.slice(0, -1).forEach(p => addKeyword(p));
-    e.target.value = parts[parts.length - 1];
-  }
-});
-document.getElementById('keywordInputArea').addEventListener('click', () => keywordInput.focus());
-document.querySelectorAll('.suggestion-chip').forEach(chip => {
-  chip.addEventListener('click', () => addKeyword(chip.dataset.kw));
-});
-btnClear.addEventListener('click', () => {
-  keywords = []; analysisData = []; rawTrendData = [];
-  renderTags();
-  resultsSection.style.display = 'none';
-  emptyState.style.display = '';
-  destroyAllCharts();
-});
-btnAnalyze.addEventListener('click', runAnalysis);
-
-async function runAnalysis() {
-  if (keywords.length === 0) return;
-  showLoading(true, '분석 준비 중...');
-  try {
-    if (isApiMode()) { await runRealAnalysis(); }
-    else { await runMockAnalysis(); }
-    activeTargetKwIndex = 0;
-    showLoading(false);
-    renderResults();
-  } catch (err) {
-    showLoading(false);
-    handleApiError(err);
-  }
-}
-
-async function runRealAnalysis() {
-  updateLoadingStatus('키워드 데이터 조회 중...');
-  const kwResults = await ApiClient.fetchKeywordData(keywords);
-  updateLoadingStatus('검색 트렌드 수집 중...');
-  const trendResults = await ApiClient.fetchTrendData(keywords, trendPeriod, trendDevice);
-  updateLoadingStatus('결과 처리 중...');
-  analysisData = mergeApiResults(kwResults, trendResults, keywords);
-  rawTrendData = trendResults;
-}
-
-async function runMockAnalysis() {
-  const steps = ['검색광고 API 연결 중...','키워드 데이터 조회 중...','트렌드 데이터 수집 중...','결과 처리 중...'];
-  for (let i = 0; i < steps.length; i++) { updateLoadingStatus(steps[i]); await sleep(250); }
-  analysisData = generateMockData(keywords);
-  rawTrendData = null;
-}
-
-function mergeApiResults(kwResults, trendResults, requestedKeywords) {
-  return requestedKeywords.map((kw, idx) => {
-    const kwData = kwResults.find(r => r.keyword === kw) || {};
-    const trend  = trendResults.find(r => r.keyword === kw) || { data: [] };
-    const compScore = { low: 100, mid: 60, high: 30 }[kwData.competition || 'low'];
-    const total = kwData.totalSearch || 1;
-    const avgCtr = ((kwData.pcCtr || 0) + (kwData.moCtr || 0)) / 2;
-    const efficiencyScore = Math.round((Math.log10(Math.max(total, 10)) / 5) * 35 + (avgCtr / 6) * 35 + (compScore / 100) * 30);
-    const trendArr = trend.data || [];
-    let trendDirection = 'flat';
-    if (trendArr.length >= 2) {
-      const last = trendArr[trendArr.length - 1].ratio;
-      const prev = trendArr[trendArr.length - 2].ratio;
-      if (last > prev + 5) trendDirection = 'up';
-      else if (last < prev - 5) trendDirection = 'down';
-    }
-    const trendByDevice = { all: trendArr, pc: trendArr, mo: trendArr };
-    return {
-      keyword: kw, color: KEYWORD_COLORS[idx % KEYWORD_COLORS.length], index: idx,
-      found: kwData.found !== false,
-      totalSearch: kwData.totalSearch || 0, pcSearch: kwData.pcSearch || 0, mobileSearch: kwData.mobileSearch || 0,
-      pcRatio: kwData.pcRatio || 50, mobileRatio: kwData.mobileRatio || 50,
-      pcCtr: kwData.pcCtr || 0, moCtr: kwData.moCtr || 0, pcClicks: kwData.pcClicks || 0, moClicks: kwData.moClicks || 0,
-      competition: kwData.competition || 'low', competitionLabel: kwData.competitionLabel || '낮음',
-      maleRatio: kwData.maleRatio || 50, femaleRatio: kwData.femaleRatio || 50,
-      ageRatio: kwData.ageRatio || getDefaultAgeRatio(),
-      trendData: trendByDevice, trendDirection,
-      efficiencyScore: Math.min(99, Math.max(10, efficiencyScore)),
-    };
-  });
-}
-
-function getDefaultAgeRatio() {
-  return [
-    { label: '10대', ratio: 5 }, { label: '20대', ratio: 20 }, { label: '30대', ratio: 30 },
-    { label: '40대', ratio: 25 }, { label: '50대', ratio: 15 }, { label: '60대+', ratio: 5 },
-  ];
-}
-
-async function refreshTrendData() {
-  if (!isApiMode() || !analysisData.length) {
-    renderTrendChart(analysisData, trendPeriod, trendDevice);
-    return;
-  }
-  try {
-    const trendResults = await ApiClient.fetchTrendData(keywords, trendPeriod, trendDevice);
-    rawTrendData = trendResults;
-    trendResults.forEach(r => {
-      const d = analysisData.find(a => a.keyword === r.keyword);
-      if (d) d.trendData.all = r.data;
-    });
-    renderTrendChart(analysisData, trendPeriod, trendDevice);
-  } catch (err) {
-    resultsSection.style.display = '';
-    renderTrendChart(analysisData, trendPeriod, trendDevice);
-  }
-}
-
-function handleApiError(err) {
-  if (err instanceof ApiError && err.code === 'NO_WORKER_URL') {
-    // Worker URL 없으면 그냥 Mock으로 실행
-    const mockData = generateMockData(keywords);
-    analysisData = mockData;
-    renderResults();
-    return;
-  }
-  showToast('오류가 발생했습니다. Mock 데이터로 표시합니다.', 'error');
-  if (!analysisData.length) {
-    analysisData = generateMockData(keywords);
-    renderResults();
-  }
-}
-
-function showLoading(show, msg) {
-  loadingOverlay.style.display = show ? 'flex' : 'none';
-  if (show) { resultsSection.style.display = 'none'; emptyState.style.display = 'none'; if (msg) updateLoadingStatus(msg); }
-}
-function updateLoadingStatus(msg) { if (loadingStatus) loadingStatus.textContent = msg; }
-
-function renderResults() {
-  destroyAllCharts();
-  emptyState.style.display = 'none';
-  resultsSection.style.display = '';
-  updateModeBadge();
-  renderOverview();
-  renderTarget();
-  renderTrend();
-  renderEfficiency();
-  switchTab('overview');
-}
-
-function updateModeBadge() {
-  let badge = document.getElementById('modeBadge');
-  if (!badge) {
-    badge = document.createElement('span');
-    badge.id = 'modeBadge';
-    badge.style.cssText = 'font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;margin-left:8px;';
-    document.querySelector('.logo')?.appendChild(badge);
-  }
-  if (isApiMode()) {
-    badge.textContent = 'LIVE'; badge.style.background = '#DCFCE7'; badge.style.color = '#15803D';
-  } else {
-    badge.textContent = 'MOCK'; badge.style.background = '#FEF9C3'; badge.style.color = '#A16207';
-  }
-}
-
-document.querySelectorAll('.tab-btn').forEach(btn => {
-  btn.addEventListener('click', () => switchTab(btn.dataset.tab));
-});
-function switchTab(tab) {
-  activeTab = tab;
-  document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
-  document.querySelectorAll('.tab-content').forEach(c => c.classList.toggle('active', c.id === `tab-${tab}`));
-}
-
-function renderOverview() {
-  document.getElementById('overviewGrid').innerHTML = analysisData.map(d => buildOverviewCard(d)).join('');
-}
-
-function buildOverviewCard(d) {
-  const compClass = { high: 'comp-high', mid: 'comp-mid', low: 'comp-low' }[d.competition];
-  const trendIcon = { up: '↑', down: '↓', flat: '→' }[d.trendDirection];
-  const trendColor = { up: '#10B981', down: '#EF4444', flat: '#94A3B8' }[d.trendDirection];
-  const maxAge = Math.max(...d.ageRatio.map(a => a.ratio));
-  const ageBars = d.ageRatio.map(a => `
-    <div class="age-bar-col">
-      <div class="age-bar-fill" style="height:${Math.round((a.ratio / maxAge) * 36)}px;background:${a.ratio === maxAge ? d.color : d.color + '55'}"></div>
-      <span class="age-bar-lbl">${a.label.replace('대', '')}</span>
-    </div>
-  `).join('');
-  const notFoundBadge = !d.found ? `<span style="font-size:10px;background:#FEF2F2;color:#EF4444;padding:2px 7px;border-radius:10px;font-weight:600">데이터 없음</span>` : '';
-  return `
-    <div class="kw-card${!d.found ? ' kw-card-empty' : ''}">
-      <div class="kw-card-header">
-        <div class="kw-color-dot" style="background:${d.color}"></div>
-        <span class="kw-card-title">${d.keyword}</span>
-        ${notFoundBadge}
-        <span class="kw-competition ${compClass}"><span class="comp-dot"></span>${d.competitionLabel}</span>
-        <span style="font-size:13px;font-weight:700;color:${trendColor}">${trendIcon}</span>
-      </div>
-      <div class="kw-stats-main">
-        <div class="stat-item">
-          <div class="stat-label">월 총 검색량</div>
-          <div class="stat-value highlight">${formatNumber(d.totalSearch)}</div>
-          <div class="stat-sub">최근 1개월</div>
-        </div>
-        <div class="stat-item">
-          <div class="stat-label">PC 검색량</div>
-          <div class="stat-value">${formatNumber(d.pcSearch)}</div>
-          <div class="stat-sub">${d.pcRatio}%</div>
-        </div>
-        <div class="stat-item">
-          <div class="stat-label">MO 검색량</div>
-          <div class="stat-value">${formatNumber(d.mobileSearch)}</div>
-          <div class="stat-sub">${d.mobileRatio}%</div>
-        </div>
-      </div>
-      <div class="device-split">
-        <div class="device-split-label">
-          <span class="pc"><i class="fa-solid fa-desktop" style="font-size:10px"></i> PC ${d.pcRatio}%</span>
-          <span class="mo"><i class="fa-solid fa-mobile-screen-button" style="font-size:10px"></i> MO ${d.mobileRatio}%</span>
-        </div>
-        <div class="device-bar">
-          <div class="device-bar-pc" style="width:${d.pcRatio}%"></div>
-          <div class="device-bar-mo" style="width:${d.mobileRatio}%"></div>
-        </div>
-      </div>
-      <div class="kw-mini-charts">
-        <div class="mini-chart-box">
-          <div class="mini-chart-title">성별 비율</div>
-          <div class="gender-bars">
-            <div class="gender-row">
-              <span class="gender-icon male"><i class="fa-solid fa-mars"></i></span>
-              <div class="gender-bar-wrap"><div class="gender-bar-fill male" style="width:${d.maleRatio}%"></div></div>
-              <span class="gender-pct">${d.maleRatio}%</span>
-            </div>
-            <div class="gender-row">
-              <span class="gender-icon female"><i class="fa-solid fa-venus"></i></span>
-              <div class="gender-bar-wrap"><div class="gender-bar-fill female" style="width:${d.femaleRatio}%"></div></div>
-              <span class="gender-pct">${d.femaleRatio}%</span>
-            </div>
-          </div>
-        </div>
-        <div class="mini-chart-box">
-          <div class="mini-chart-title">연령대</div>
-          <div class="age-bars">${ageBars}</div>
-        </div>
-      </div>
-      <div class="ctr-badges">
-        <div class="ctr-badge pc-badge">
-          <div class="ctr-badge-label">PC CTR</div>
-          <div class="ctr-badge-value">${d.pcCtr}%</div>
-          <div class="ctr-badge-sub">${formatNumber(d.pcClicks)} 클릭</div>
-        </div>
-        <div class="ctr-badge mo-badge">
-          <div class="ctr-badge-label">MO CTR</div>
-          <div class="ctr-badge-value">${d.moCtr}%</div>
-          <div class="ctr-badge-sub">${formatNumber(d.moClicks)} 클릭</div>
-        </div>
-      </div>
-    </div>
-  `;
-}
-
-function renderTarget() {
-  const nav = document.getElementById('targetKeywordNav');
-  nav.innerHTML = analysisData.map((d, i) => `
-    <button class="target-kw-btn${i === activeTargetKwIndex ? ' active' : ''}" data-idx="${i}"
-      style="${i === activeTargetKwIndex ? `background:${d.color};border-color:${d.color}` : ''}">
-      <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${d.color};margin-right:5px;vertical-align:middle"></span>
-      ${d.keyword}
-    </button>
-  `).join('');
-  nav.querySelectorAll('.target-kw-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      activeTargetKwIndex = parseInt(btn.dataset.idx);
-      renderTarget();
-      renderTargetCharts(analysisData[activeTargetKwIndex]);
-    });
-  });
-  renderTargetCharts(analysisData[activeTargetKwIndex]);
-}
-
-function renderTargetCharts(d) {
-  const container = document.getElementById('targetCharts');
-  const dominantGender = d.maleRatio >= d.femaleRatio ? `남성 (${d.maleRatio}%)` : `여성 (${d.femaleRatio}%)`;
-  const topAge  = [...d.ageRatio].sort((a, b) => b.ratio - a.ratio)[0];
-  const topAge2 = [...d.ageRatio].sort((a, b) => b.ratio - a.ratio)[1];
-  container.innerHTML = `
-    <div class="target-chart-card">
-      <h3><i class="fa-solid fa-venus-mars" style="color:${d.color}"></i> 성별 분포</h3>
-      <p class="target-chart-subtitle">"${d.keyword}" 키워드 검색 성별 비율</p>
-      <div class="gender-donut-wrap">
-        <canvas id="genderDonut_${d.index}" width="160" height="160"></canvas>
-        <div class="gender-legend">
-          <div class="gender-legend-item">
-            <div class="legend-dot" style="background:#3B82F6"></div>
-            <span class="legend-label"><i class="fa-solid fa-mars" style="color:#3B82F6"></i> 남성</span>
-            <div><div class="legend-pct">${d.maleRatio}%</div><div class="legend-count">${formatNumber(Math.round(d.totalSearch * d.maleRatio / 100))}건</div></div>
-          </div>
-          <div class="gender-legend-item">
-            <div class="legend-dot" style="background:#EC4899"></div>
-            <span class="legend-label"><i class="fa-solid fa-venus" style="color:#EC4899"></i> 여성</span>
-            <div><div class="legend-pct">${d.femaleRatio}%</div><div class="legend-count">${formatNumber(Math.round(d.totalSearch * d.femaleRatio / 100))}건</div></div>
-          </div>
-        </div>
-      </div>
-      <div class="insight-box">
-        <span class="insight-icon">💡</span>
-        <span class="insight-text"><strong>"${d.keyword}"</strong> 키워드는 <strong>${dominantGender}</strong>이 주로 검색합니다.</span>
-      </div>
-    </div>
-    <div class="target-chart-card">
-      <h3><i class="fa-solid fa-chart-bar" style="color:${d.color}"></i> 연령대 분포</h3>
-      <p class="target-chart-subtitle">"${d.keyword}" 키워드 검색 연령대 비율</p>
-      <div class="age-chart-wrap" style="height:200px"><canvas id="ageBar_${d.index}"></canvas></div>
-      <div class="insight-box">
-        <span class="insight-icon">🎯</span>
-        <span class="insight-text">주요 검색 연령은 <strong>${topAge.label} (${topAge.ratio}%)</strong>, <strong>${topAge2.label} (${topAge2.ratio}%)</strong> 순입니다.</span>
-      </div>
-    </div>
-    <div class="target-chart-card" style="grid-column: span 2;">
-      <h3><i class="fa-solid fa-mobile-screen-button" style="color:${d.color}"></i> 기기별 검색 비율 및 클릭 효율</h3>
-      <p class="target-chart-subtitle">"${d.keyword}" PC vs 모바일 상세 비교</p>
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:16px;margin-top:8px">
-        ${buildDeviceStatBox('PC', d.pcSearch, d.pcRatio, d.pcCtr, d.pcClicks, '#4F46E5')}
-        ${buildDeviceStatBox('모바일', d.mobileSearch, d.mobileRatio, d.moCtr, d.moClicks, '#03C75A')}
-        <div style="background:var(--surface-2);border:1px solid var(--border);border-radius:12px;padding:20px;text-align:center">
-          <div style="font-size:11px;font-weight:700;color:var(--text-muted);margin-bottom:8px">경쟁도</div>
-          <div class="comp-badge ${d.competition}" style="font-size:16px;justify-content:center;padding:8px 16px"><span class="comp-dot"></span>${d.competitionLabel}</div>
-          <div style="font-size:12px;color:var(--text-muted);margin-top:8px">${d.competition === 'high' ? '경쟁이 매우 치열한 키워드입니다' : d.competition === 'mid' ? '적당한 경쟁 수준의 키워드입니다' : '경쟁이 낮아 진입하기 좋습니다'}</div>
-        </div>
-        <div style="background:var(--surface-2);border:1px solid var(--border);border-radius:12px;padding:20px;text-align:center">
-          <div style="font-size:11px;font-weight:700;color:var(--text-muted);margin-bottom:8px">효율 점수</div>
-          <div style="font-size:36px;font-weight:800;color:${getScoreColor(d.efficiencyScore)}">${d.efficiencyScore}</div>
-          <div style="font-size:12px;color:var(--text-muted);margin-top:4px">${d.efficiencyScore >= 70 ? '🟢 광고 효율 우수' : d.efficiencyScore >= 45 ? '🟡 광고 효율 보통' : '🔴 광고 효율 낮음'}</div>
-        </div>
-      </div>
-    </div>
-  `;
-  setTimeout(() => {
-    renderGenderDonut(`genderDonut_${d.index}`, d);
-    renderAgeBar(`ageBar_${d.index}`, d.ageRatio, d.color);
-  }, 50);
-}
-
-function buildDeviceStatBox(label, search, ratio, ctr, clicks, color) {
-  return `
-    <div style="background:var(--surface-2);border:1px solid var(--border);border-radius:12px;padding:20px">
-      <div style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px">
-        ${label === 'PC' ? '<i class="fa-solid fa-desktop"></i>' : '<i class="fa-solid fa-mobile-screen-button"></i>'} ${label}
-      </div>
-      <div style="margin-bottom:8px">
-        <div style="font-size:11px;color:var(--text-muted)">검색량</div>
-        <div style="font-size:20px;font-weight:800;color:${color}">${formatNumber(search)}</div>
-        <div style="font-size:11px;color:var(--text-muted)">(전체 ${ratio}%)</div>
-      </div>
-      <div style="display:flex;gap:12px;margin-top:10px">
-        <div><div style="font-size:10px;color:var(--text-muted)">CTR</div><div style="font-size:16px;font-weight:700;color:${color}">${ctr}%</div></div>
-        <div><div style="font-size:10px;color:var(--text-muted)">월 예상클릭</div><div style="font-size:16px;font-weight:700;color:var(--text-primary)">${formatNumber(clicks)}</div></div>
-      </div>
-    </div>
-  `;
-}
-
-function renderTrend() {
-  renderTrendChart(analysisData, trendPeriod, trendDevice);
-  renderTrendLegend(analysisData);
-}
-
-document.querySelectorAll('.period-btn').forEach(btn => {
-  btn.addEventListener('click', async () => {
-    trendPeriod = parseInt(btn.dataset.period);
-    document.querySelectorAll('.period-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    if (analysisData.length > 0) await refreshTrendData();
-  });
-});
-document.querySelectorAll('.device-btn').forEach(btn => {
-  btn.addEventListener('click', async () => {
-    trendDevice = btn.dataset.device;
-    document.querySelectorAll('.device-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    if (analysisData.length > 0) {
-      if (isApiMode()) await refreshTrendData();
-      else renderTrendChart(analysisData, trendPeriod, trendDevice);
-    }
-  });
-});
-
-function renderEfficiency() {
-  const tbody = document.getElementById('efficiencyTableBody');
-  const sorted = [...analysisData].sort((a, b) => b.efficiencyScore - a.efficiencyScore);
-  tbody.innerHTML = sorted.map((d, rank) => {
-    const scoreColor = getScoreColor(d.efficiencyScore);
-    return `
-      <tr>
-        <td>
-          <div class="kw-name-cell">
-            <span style="font-size:12px;color:var(--text-muted);font-weight:700;min-width:16px">${rank + 1}</span>
-            <div class="kw-dot-sm" style="background:${d.color}"></div>
-            ${d.keyword}
-          </div>
-        </td>
-        <td class="num-value">${formatNumber(d.totalSearch)}</td>
-        <td class="num-value">${formatNumber(d.pcClicks)}</td>
-        <td class="num-value">${formatNumber(d.moClicks)}</td>
-        <td class="ctr-value" style="color:#4F46E5">${d.pcCtr}%</td>
-        <td class="ctr-value" style="color:#03C75A">${d.moCtr}%</td>
-        <td><span class="comp-badge ${d.competition}"><span class="comp-dot"></span>${d.competitionLabel}</span></td>
-        <td>
-          <div class="score-bar-wrap">
-            <div class="score-bar-bg"><div class="score-bar-fill" style="width:${d.efficiencyScore}%;background:${scoreColor}"></div></div>
-            <span class="score-num" style="color:${scoreColor}">${d.efficiencyScore}</span>
-          </div>
-        </td>
-      </tr>
-    `;
-  }).join('');
-}
-
-/* Modal */
-btnSettings.addEventListener('click', () => { loadApiSettings(); modalOverlay.style.display = 'flex'; });
-[modalClose, modalCancel].forEach(el => el.addEventListener('click', () => { modalOverlay.style.display = 'none'; }));
-modalOverlay.addEventListener('click', (e) => { if (e.target === modalOverlay) modalOverlay.style.display = 'none'; });
-modalSave.addEventListener('click', () => { saveApiSettings(); modalOverlay.style.display = 'none'; updateModeBadge(); showToast('✅ API 설정이 저장되었습니다.', 'success'); });
-
-function saveApiSettings() {
-  const el = document.getElementById('workerUrl');
-  const val = el?.value?.trim();
-  if (val) localStorage.setItem('kl_workerUrl', val);
-  else localStorage.removeItem('kl_workerUrl');
-}
-function loadApiSettings() {
-  const el = document.getElementById('workerUrl');
-  if (el) el.value = localStorage.getItem('kl_workerUrl') || '';
-}
-
-/* Toast */
-function showToast(msg, type = '') {
-  let toast = document.getElementById('globalToast');
-  if (!toast) { toast = document.createElement('div'); toast.id = 'globalToast'; toast.className = 'toast'; document.body.appendChild(toast); }
-  toast.textContent = msg;
-  toast.className = `toast ${type}`;
-  setTimeout(() => toast.classList.add('show'), 10);
-  setTimeout(() => toast.classList.remove('show'), 2800);
-}
-
-function sleep(ms) { return new Promise(resolve => setTimeout(resolve, ms)); }
-
-/* Init */
-renderTags();
-updateModeBadge();
-</script>
+  <script src="js/mockData.js?v=20260313b"><\/script>
+  <script src="js/api.js?v=20260313b"><\/script>
+  <script src="js/charts.js?v=20260313b"><\/script>
+  <script src="js/app.js?v=20260313b"><\/script>
 <script src="https://www.genspark.ai/sandbox_inspect.js"></script></body>
+</html>`;
+  }
+
+  // ── css/style.css ───────────────────────
+  function getStyleCss() {
+    return document.querySelector('style[data-src="style"]')?.textContent
+      || fetchStyleContent();
+  }
+
+  function fetchStyleContent() {
+    // style.css를 fetch로 가져오기 (동일 오리진)
+    const req = new XMLHttpRequest();
+    req.open('GET', 'css/style.css', false);
+    req.send();
+    return req.status === 200 ? req.responseText : '/* style.css 내용을 불러올 수 없습니다 */';
+  }
+
+  // JS 파일들도 동일하게 fetch로 가져오기
+  function fetchFileSync(url) {
+    const req = new XMLHttpRequest();
+    req.open('GET', url, false);
+    req.send();
+    return req.status === 200 ? req.responseText : `/* ${url} 내용을 불러올 수 없습니다 */`;
+  }
+
+  function getMockDataJs() { return fetchFileSync('js/mockData.js'); }
+  function getApiJs()      { return fetchFileSync('js/api.js'); }
+  function getChartsJs()   { return fetchFileSync('js/charts.js'); }
+  function getAppJs()      { return fetchFileSync('js/app.js'); }
+
+  // ── cloudflare-worker/worker.js ─────────
+  function getWorkerJs() {
+    return `/**
+ * KeywordLens - Cloudflare Worker Proxy
+ * ----------------------------------------
+ * 네이버 검색광고 API + 데이터랩 API 프록시
+ * CORS 처리 + HMAC-SHA256 서명 생성 포함
+ *
+ * 환경변수 (Workers Settings > Variables):
+ *   SEARCHAD_API_KEY      : 검색광고 Access License
+ *   SEARCHAD_SECRET       : 검색광고 Secret Key
+ *   SEARCHAD_CUSTOMER     : 검색광고 Customer ID
+ *   NAVER_CLIENT_ID       : 데이터랩 Client ID
+ *   NAVER_CLIENT_SECRET   : 데이터랩 Client Secret
+ */
+
+const SEARCHAD_BASE = 'https://api.naver.com';
+const DATALAB_BASE  = 'https://openapi.naver.com/v1/datalab';
+
+const CORS_HEADERS = {
+  'Access-Control-Allow-Origin':  '*',
+  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+};
+
+async function makeSignature(timestamp, method, path, secretKey) {
+  const message = \`\${timestamp}.\${method}.\${path}\`;
+  const encoder = new TextEncoder();
+  const keyData = encoder.encode(secretKey);
+  const msgData = encoder.encode(message);
+  const cryptoKey = await crypto.subtle.importKey(
+    'raw', keyData, { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']
+  );
+  const signature = await crypto.subtle.sign('HMAC', cryptoKey, msgData);
+  return btoa(String.fromCharCode(...new Uint8Array(signature)));
+}
+
+async function getSearchAdHeaders(method, path, env) {
+  const timestamp = Date.now().toString();
+  const signature = await makeSignature(timestamp, method, path, env.SEARCHAD_SECRET);
+  return {
+    'Content-Type': 'application/json; charset=UTF-8',
+    'X-Timestamp':  timestamp,
+    'X-API-KEY':    env.SEARCHAD_API_KEY,
+    'X-Customer':   env.SEARCHAD_CUSTOMER,
+    'X-Signature':  signature,
+  };
+}
+
+export default {
+  async fetch(request, env) {
+    if (request.method === 'OPTIONS') {
+      return new Response(null, { status: 204, headers: CORS_HEADERS });
+    }
+    const url = new URL(request.url);
+    const pathname = url.pathname;
+    try {
+      if (pathname === '/keyword' && request.method === 'POST') return await handleKeyword(request, env);
+      if (pathname === '/trend'   && request.method === 'POST') return await handleTrend(request, env);
+      if (pathname === '/health') return jsonResponse({ status: 'ok', timestamp: Date.now() });
+      return jsonResponse({ error: 'Not Found', path: pathname }, 404);
+    } catch (err) {
+      console.error('[Worker Error]', err);
+      return jsonResponse({ error: err.message || 'Internal Server Error' }, 500);
+    }
+  }
+};
+
+async function handleKeyword(request, env) {
+  const body = await request.json();
+  const keywords = body.keywords;
+  if (!Array.isArray(keywords) || keywords.length === 0) return jsonResponse({ error: 'keywords 배열이 필요합니다.' }, 400);
+  if (keywords.length > 10) return jsonResponse({ error: '키워드는 최대 10개까지 가능합니다.' }, 400);
+  const kwPath = '/keywordstool';
+  const kwHeaders = await getSearchAdHeaders('GET', kwPath, env);
+  const hintParams = keywords.map(k => \`hintKeywords=\${encodeURIComponent(k)}\`).join('&');
+  const kwUrl = \`\${SEARCHAD_BASE}\${kwPath}?showDetail=1&\${hintParams}\`;
+  const kwRes = await fetch(kwUrl, { method: 'GET', headers: kwHeaders });
+  if (!kwRes.ok) {
+    const errText = await kwRes.text();
+    return jsonResponse({ error: \`검색광고 API 오류 (\${kwRes.status})\`, detail: errText }, kwRes.status);
+  }
+  const kwData = await kwRes.json();
+  const result = mergeKeywordData(keywords, kwData);
+  return jsonResponse(result);
+}
+
+function mergeKeywordData(requestedKeywords, kwData) {
+  const keywordList = kwData.keywordList || [];
+  const result = requestedKeywords.map(reqKw => {
+    const match = keywordList.find(k => k.relKeyword === reqKw)
+                || keywordList.find(k => k.relKeyword?.includes(reqKw));
+    if (!match) return { keyword: reqKw, found: false, totalSearch:0, pcSearch:0, mobileSearch:0, pcRatio:0, mobileRatio:0, pcCtr:0, moCtr:0, pcClicks:0, moClicks:0, competition:'low', competitionLabel:'낮음', maleRatio:50, femaleRatio:50, ageRatio: getEmptyAgeRatio() };
+    const pcSearch     = match.monthlyPcQcCnt     === '< 10' ? 5 : parseInt(match.monthlyPcQcCnt)     || 0;
+    const mobileSearch = match.monthlyMobileQcCnt === '< 10' ? 5 : parseInt(match.monthlyMobileQcCnt) || 0;
+    const totalSearch  = pcSearch + mobileSearch;
+    const pcRatio      = totalSearch > 0 ? Math.round((pcSearch / totalSearch) * 100) : 50;
+    const mobileRatio  = 100 - pcRatio;
+    const pcCtr    = parseFloat((match.monthlyAvePcClkCnt     / (pcSearch     || 1) * 100).toFixed(2));
+    const moCtr    = parseFloat((match.monthlyAveMobileClkCnt / (mobileSearch || 1) * 100).toFixed(2));
+    const pcClicks = match.monthlyAvePcClkCnt     || 0;
+    const moClicks = match.monthlyAveMobileClkCnt || 0;
+    const compMap      = { '높음':'high', '보통':'mid', '낮음':'low' };
+    const compLabelMap = { high:'높음', mid:'보통', low:'낮음' };
+    const competition  = compMap[match.compIdx] || 'low';
+    const genderRatio  = parseGenderRatio(match);
+    const ageRatio     = parseAgeRatio(match);
+    return { keyword: match.relKeyword || reqKw, found: true, totalSearch, pcSearch, mobileSearch, pcRatio, mobileRatio, pcCtr: Math.min(99, Math.max(0, pcCtr)), moCtr: Math.min(99, Math.max(0, moCtr)), pcClicks, moClicks, competition, competitionLabel: compLabelMap[competition], maleRatio: genderRatio.male, femaleRatio: genderRatio.female, ageRatio };
+  });
+  return { keywords: result, raw: { total: keywordList.length } };
+}
+
+function parseGenderRatio(match) {
+  try {
+    const male = Math.round((match.plMaleRatio || 0.5) * 100);
+    return { male, female: 100 - male };
+  } catch { return { male: 50, female: 50 }; }
+}
+
+function parseAgeRatio(match) {
+  const labels = ['10대','20대','30대','40대','50대','60대+'];
+  const fields = ['plAge10RateRatio','plAge20RateRatio','plAge30RateRatio','plAge40RateRatio','plAge50RateRatio','plAge60RateRatio'];
+  const values = fields.map(f => Math.round((match[f] || 0) * 100));
+  const total  = values.reduce((a, b) => a + b, 0);
+  if (total === 0) return getEmptyAgeRatio();
+  const normalized = values.map(v => Math.round((v / total) * 100));
+  const diff = 100 - normalized.reduce((a, b) => a + b, 0);
+  normalized[normalized.indexOf(Math.max(...normalized))] += diff;
+  return labels.map((label, i) => ({ label, ratio: normalized[i] }));
+}
+
+function getEmptyAgeRatio() {
+  return [{ label:'10대',ratio:5 },{ label:'20대',ratio:20 },{ label:'30대',ratio:30 },{ label:'40대',ratio:25 },{ label:'50대',ratio:15 },{ label:'60대+',ratio:5 }];
+}
+
+async function handleTrend(request, env) {
+  const body = await request.json();
+  const { keywords, startDate, endDate, device = 'all', gender = 'all' } = body;
+  if (!Array.isArray(keywords) || keywords.length === 0) return jsonResponse({ error: 'keywords 배열이 필요합니다.' }, 400);
+  const groups = keywords.slice(0, 5).map(kw => ({ groupName: kw, keywords: [kw] }));
+  const trendPayload = { startDate, endDate, timeUnit: 'month', keywordGroups: groups, ...(device !== 'all' && { device }), ...(gender !== 'all' && { gender }) };
+  const trendRes = await fetch(\`\${DATALAB_BASE}/search\`, {
+    method: 'POST',
+    headers: { 'Content-Type':'application/json', 'X-Naver-Client-Id': env.NAVER_CLIENT_ID, 'X-Naver-Client-Secret': env.NAVER_CLIENT_SECRET },
+    body: JSON.stringify(trendPayload),
+  });
+  if (!trendRes.ok) {
+    const errText = await trendRes.text();
+    return jsonResponse({ error: \`데이터랩 API 오류 (\${trendRes.status})\`, detail: errText }, trendRes.status);
+  }
+  const trendData = await trendRes.json();
+  let trendData2 = null;
+  if (keywords.length > 5) {
+    const groups2 = keywords.slice(5).map(kw => ({ groupName: kw, keywords: [kw] }));
+    const payload2 = { ...trendPayload, keywordGroups: groups2 };
+    const res2 = await fetch(\`\${DATALAB_BASE}/search\`, {
+      method: 'POST',
+      headers: { 'Content-Type':'application/json', 'X-Naver-Client-Id': env.NAVER_CLIENT_ID, 'X-Naver-Client-Secret': env.NAVER_CLIENT_SECRET },
+      body: JSON.stringify(payload2),
+    });
+    if (res2.ok) trendData2 = await res2.json();
+  }
+  return jsonResponse(mergeTrendData(trendData, trendData2));
+}
+
+function mergeTrendData(data1, data2) {
+  if (!data2) return data1;
+  return { ...data1, results: [...(data1.results || []), ...(data2.results || [])] };
+}
+
+function jsonResponse(data, status = 200) {
+  return new Response(JSON.stringify(data), {
+    status,
+    headers: { 'Content-Type': 'application/json; charset=utf-8', ...CORS_HEADERS },
+  });
+}`;
+  }
+  </script>
+</body>
 </html>
