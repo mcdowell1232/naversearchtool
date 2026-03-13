@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>네이버 키워드 분석 도구</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.0/css/all.min.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
+</head>
+<body>
+  <header class="header">
+    <div class="header-inner">
+      <div class="logo">
+        <span class="logo-icon"><i class="fa-solid fa-chart-line"></i></span>
+        <span class="logo-text">KeywordLens</span>
+        <span class="logo-badge">NAVER</span>
+      </div>
+      <div class="header-right">
+        <button class="btn-settings" id="btnSettings" onclick="document.getElementById('modalOverlay').style.display='flex';loadApiSettings();">
+          <i class="fa-solid fa-gear"></i><span>API 설정</span>
+        </button>
+      </div>
+    </div>
+  </header>
+  <main class="main">
+    <section class="search-panel">
+      <div class="search-panel-header">
+        <h2 class="section-title">키워드 입력</h2>
+        <span class="keyword-counter"><span id="kwCount">0</span> / 10</span>
+      </div>
+      <div class="keyword-input-area" id="keywordInputArea">
+        <div class="keyword-tags" id="keywordTags"></div>
+        <input type="text" class="keyword-input" id="keywordInput" placeholder="키워드 입력 후 Enter 또는 쉼표로 추가 (최대 10개)" autocomplete="off" />
+      </div>
+      <div class="search-actions">
+        <button class="btn-clear" id="btnClear"><i class="fa-solid fa-xmark"></i> 초기화</button>
+        <button class="btn-analyze" id="btnAnalyze"><i class="fa-solid fa-magnifying-glass-chart"></i> 분석 시작</button>
+      </div>
+      <div class="keyword-suggestions">
+        <span class="suggestion-label">예시:</span>
+        <button class="suggestion-chip" data-kw="다이어트">다이어트</button>
+        <button class="suggestion-chip" data-kw="여행">여행</button>
+        <button class="suggestion-chip" data-kw="맛집">맛집</button>
+        <button class="suggestion-chip" data-kw="노트북">노트북</button>
+        <button class="suggestion-chip" data-kw="헬스">헬스</button>
+      </div>
+    </section>
+    <div class="loading-overlay" id="loadingOverlay" style="display:none;">
+      <div class="loading-box">
+        <div class="loading-spinner"></div>
+        <p class="loading-text">데이터를 불러오는 중...</p>
+        <p class="loading-sub" id="loadingStatus">API 연결 중</p>
+      </div>
+    </div>
+    <section class="results-section" id="resultsSection" style="display:none;">
+      <div class="tab-nav">
+        <button class="tab-btn active" data-tab="overview"><i class="fa-solid fa-table-cells-large"></i> 키워드 개요</button>
+        <button class="tab-btn" data-tab="target"><i class="fa-solid fa-users"></i> 타겟 분석</button>
+        <button class="tab-btn" data-tab="trend"><i class="fa-solid fa-arrow-trend-up"></i> 검색 트렌드</button>
+        <button class="tab-btn" data-tab="efficiency"><i class="fa-solid fa-bullseye"></i> 광고 효율</button>
+      </div>
+      <div class="tab-content active" id="tab-overview"><div class="overview-grid" id="overviewGrid"></div></div>
+      <div class="tab-content" id="tab-target">
+        <div class="target-keyword-nav" id="targetKeywordNav"></div>
+        <div class="target-charts" id="targetCharts"></div>
+      </div>
+      <div class="tab-content" id="tab-trend">
+        <div class="trend-controls">
+          <div class="trend-period-btns">
+            <button class="period-btn" data-period="1">1개월</button>
+            <button class="period-btn active" data-period="3">3개월</button>
+            <button class="period-btn" data-period="6">6개월</button>
+            <button class="period-btn" data-period="12">1년</button>
+          </div>
+          <div class="trend-device-btns">
+            <button class="device-btn active" data-device="all">전체</button>
+            <button class="device-btn" data-device="pc">PC</button>
+            <button class="device-btn" data-device="mo">모바일</button>
+          </div>
+        </div>
+        <div class="trend-chart-wrap"><canvas id="trendChart"></canvas></div>
+        <div class="trend-legend" id="trendLegend"></div>
+      </div>
+      <div class="tab-content" id="tab-efficiency">
+        <div class="efficiency-table-wrap">
+          <table class="efficiency-table" id="efficiencyTable">
+            <thead>
+              <tr>
+                <th>키워드</th><th>월간 검색량</th>
+                <th><span class="th-pc">PC</span> 클릭수</th>
+                <th><span class="th-mo">MO</span> 클릭수</th>
+                <th><span class="th-pc">PC</span> CTR</th>
+                <th><span class="th-mo">MO</span> CTR</th>
+                <th>경쟁도</th><th>효율 점수</th>
+              </tr>
+            </thead>
+            <tbody id="efficiencyTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+    <div class="empty-state" id="emptyState">
+      <div class="empty-icon"><i class="fa-solid fa-magnifying-glass-chart"></i></div>
+      <h3>키워드를 입력하고 분석을 시작하세요</h3>
+      <p>최대 10개의 키워드를 입력하여<br/>광고주 관점의 상세 데이터를 확인할 수 있습니다.</p>
+    </div>
+  </main>
+  <div class="modal-overlay" id="modalOverlay" style="display:none;">
+    <div class="modal">
+      <div class="modal-header">
+        <h3><i class="fa-solid fa-key"></i> API 설정</h3>
+        <button class="modal-close" id="modalClose" onclick="document.getElementById('modalOverlay').style.display='none'"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal-body">
+        <div class="modal-section">
+          <h4><i class="fa-brands fa-cloudflare" style="color:#F48120"></i> Cloudflare Worker URL</h4>
+          <div class="form-group">
+            <label>Worker 프록시 URL</label>
+            <input type="text" id="workerUrl" placeholder="https://keywordlens-proxy.xxxxx.workers.dev" />
+          </div>
+        </div>
+        <div class="modal-notice">
+          <i class="fa-solid fa-flask"></i>
+          <span>Worker URL 미입력 시 <strong>Mock 데이터 모드</strong>로 동작합니다.</span>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-modal-cancel" id="modalCancel" onclick="document.getElementById('modalOverlay').style.display='none'">취소</button>
+        <button class="btn-modal-save" id="modalSave" onclick="saveAndClose()"><i class="fa-solid fa-floppy-disk"></i> 저장</button>
+      </div>
+    </div>
+  </div>
+  <script src="js/mockData.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/charts.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
